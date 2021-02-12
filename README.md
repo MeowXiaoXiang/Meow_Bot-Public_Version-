@@ -2,10 +2,12 @@
 
 pip install flask
 
-pip install opencc
+pip install mwclient
+
+pip install OpenCC
 
 pip install discord
 
 pip install discord.py
 
-pip install chinese_converter
+要使用的話記得要創立一個名為log資料夾避免錯誤

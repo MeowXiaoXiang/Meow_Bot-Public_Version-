@@ -11,7 +11,7 @@ Dict = json.loads(rawDict.text)
 Dict = Dict['messages']
 
 class baroManual(Cog_Extension):
-  @commands.command(name='baro',aliases=['奸商' , 'Baro'])
+  @commands.command(name='baro',aliases=['奸商' , '虛空商人' , 'Baro'], brief="warframe", description="此功能可以查詢虛空商人的商品或抵達前剩餘時間")
   async def baroManual(self,ctx):
     url = requests.get("https://api.warframestat.us/pc/tc/voidTrader",headers={'Accept-Language':'zh','Cache-Control': 'no-cache'})
     html = json.loads(url.text)

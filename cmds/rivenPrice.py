@@ -4,58 +4,41 @@ from core.classes import Cog_Extension
 import os
 import requests
 import json
+import shutil
 
-with open('dict/Weapons.json', 'r', encoding='utf8') as weapons:
-  weapons = json.load(weapons)
+with open('dict/Weapons.json', 'r', encoding='utf8') as dict:
+  dict = json.load(dict)
 
 with open('dict/attributes.json', 'r', encoding='utf8') as attrDict:
   attrDict = json.load(attrDict)
 
-kuva_only = ["kuva_bramma", "kuva_chakkhurr","kuva_ayanga","kuva_shildeg"]
-prime_only = ["euphona_prime","reaper_prime","dakra_prime"]
-
-def replace(name):
-  weapon = name
-  weapon = weapon.replace(" ","_")   
-  weapon = weapon.replace("_wraith","")
-  weapon = weapon.replace("_vandal","")
-  weapon = weapon.replace("prisma_","")
-  weapon = weapon.replace("mara_","")
-  weapon = weapon.replace("mk1-","")
-  weapon = weapon.replace("telos_","")
-  weapon = weapon.replace("synoid_","")
-  weapon = weapon.replace("secura_","")
-  weapon = weapon.replace("rakta_","")
-  weapon = weapon.replace("sancti_","")
-  weapon = weapon.replace("vaykor_","")
-  if weapon != "dex_dakra":
-    weapon = weapon.replace("dex_","")
-  if weapon not in prime_only:
-    weapon = weapon.replace("_prime","")
-  if weapon not in kuva_only:
-    weapon = weapon.replace("kuva_","")
-  return(weapon)
+with open('setting.json', 'r', encoding='utf8') as jfile:
+    jdata = json.load(jfile)
 
 class rivenPrice(Cog_Extension):
-  @commands.command(name='riven',aliases=['紫卡','紫卡查詢'])
+  @commands.command(name='riven',aliases=['紫卡','紫卡查詢'], brief="warframe", description=f"可以查詢warframe.market上的紫卡 使用方式：{jdata['command_prefix']}riven [武器名稱(可用中文)]")
   async def rivenPrice(self,ctx,*args):
     msg = self.riven(' '.join(args))
     await ctx.send(msg)
-
+  
   def riven(self,name):
-    if name == "奶子":
-      return("你到底是有多喜歡奶子啊")
     Chinese= name
-    weapon = weapons.get(name, "Empty")
+    name = name.replace(" ","_")
+    # Euphona and Reaper has only prime variant
+    # prime_only = ["euphona_prime", "reaper_prime"]
+    # if name_lower not in prime_only:
+    name_lower = name.lower()
+    if name_lower != "euphona_prime" and name_lower != "reaper_prime":
+      name = name_lower.replace("_prime","")
+      name = name.replace("prime","")
+    weapon = dict.get(name,"Empty")
     if weapon == "Empty":
       weapon = name
-    weapon = weapon.lower()
-    weapon = replace(weapon)
-   
-    
+    else:
+      weapon = weapon.lower()
+    print(weapon)
     url = 'https://api.warframe.market/v1/auctions/search?type=riven&weapon_url_name=' + weapon + '&sort_by=price_asc'
     html = requests.get(url)
-    weapon = weapon.replace("_"," ")
     if html.status_code != 200:
       return('查到...Ordis發生錯誤...API出錯！')
     else:
@@ -63,14 +46,14 @@ class rivenPrice(Cog_Extension):
       rivenData = rivenData['payload']
       rivenData = rivenData['auctions']
       count = 0
-      message = f'以下為{Chinese}紫卡的查詢結果（按價格由低至高順序）\n'
+      message = f'以下為{Chinese}紫卡的查詢結果（按價格由低至高順序）\n>>> '
       for items in rivenData:
         if count < 3:
           owner = items['owner']
           if owner['status'] != 'offline':
             rivenItem = items['item']
             rivenName = rivenItem['name']
-            message += f'```\n紫卡名稱:{Chinese} {rivenName}\n'
+            message += f'```diff\n紫卡名稱:{Chinese} {rivenName}\n'
             ownerName = owner['ingame_name']
             message += f'賣家:{ownerName}\n'
             rank = rivenItem['mod_rank']
@@ -82,9 +65,9 @@ class rivenPrice(Cog_Extension):
               attribute = attrDict.get(attribute,attribute)
               value = attr['value']
               if attr['positive'] == True:
-                message += f'正面詞條:{attribute} {value}\n'
+                message += f'+正面詞條:{attribute} {value}\n'
               elif attr['positive'] == False:
-                message += f'負面詞條:{attribute} {value}\n'
+                message += f'-負面詞條:{attribute} {value}\n'
             if items['top_bid'] == 'None':
               top_bid = items['top_bid']
               message += f'目前競標:{top_bid}\n'

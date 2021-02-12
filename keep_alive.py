@@ -5,7 +5,7 @@ app = Flask('')
 
 @app.route('/')
 def main():
-	return 'Meow_Bot is Online！'
+	return 'Bot is Online！'
 
 def run():
     app.run(host="0.0.0.0", port=8080)

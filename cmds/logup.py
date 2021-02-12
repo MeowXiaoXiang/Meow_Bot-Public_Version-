@@ -18,10 +18,10 @@ for logname in os.listdir('./log'):
 logindex = 0
 
 class logup(Cog_Extension):
-    @commands.command(name= 'loglist', aliases=['列出log' , 'log列表'])
+    @commands.command(name= 'loglist', aliases=['列出log' , 'log列表'], brief="admin", description="列出所有機器人攔截到的對話紀錄log檔案清單")
     async def loglist(self,ctx):
         if ctx.author.id == jdata['owner']:
-            await ctx.send(f'Log列表\n指令：' + jdata["command_prefix"] + 'downloadlog [編號] ,' + jdata["command_prefix"] + 'reloadlog')
+            await ctx.send(f'Log列表\n指令：{jdata["command_prefix"]}downloadlog [編號] ,{ jdata["command_prefix"]}reloadlog')
             msg = ''
             dou = 0
             for i in loglist:
@@ -34,7 +34,7 @@ class logup(Cog_Extension):
             print(msg)
             await ctx.send('```'+msg+'```')
 
-    @commands.command(name= 'reloadlog', aliases=['重載log' , '重新載入log'])
+    @commands.command(name= 'reloadlog', aliases=['重載log' , '重新載入log'], brief="admin", description="重新載入log紀錄檔案清單")
     async def reloadlog(self,ctx):
         if ctx.author.id == jdata['owner']:
             global loglist,logindex
@@ -47,7 +47,7 @@ class logup(Cog_Extension):
             await ctx.send('已重新加載')
             logindex = 0
 
-    @commands.command(name= 'downloadlog', aliases=['下載log' , 'log下載'])
+    @commands.command(name= 'downloadlog', aliases=['下載log' , 'log下載'], brief="admin", description="下載log對話紀錄檔案")
     async def downloadlog(self,ctx,index):
         if ctx.author.id == jdata['owner']:
             a = 0
