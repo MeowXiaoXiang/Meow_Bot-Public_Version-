@@ -9,6 +9,8 @@
 + pip install discord.py
 + pip install loguru
 + pip install discord-webhook
++ pip install mwclient
++ pip install OpenCC
 
 此版本直接把一堆不該有的東西清理過了 為乾淨版本(可能會漏刪)
 
@@ -23,3 +25,4 @@
 `   '''code'''`
 
 舊的目前命名為help.pydis要使用的話把main內那個刪除 和 把 help.pydis內的dis去掉慢慢填上去即可
+
