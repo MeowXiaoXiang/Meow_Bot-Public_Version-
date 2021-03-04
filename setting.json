@@ -1,20 +1,6 @@
 {
-    "TOKEN": "[Your TOKEN]",
+    "TOKEN": "YOUR TOKEN",
     "command_prefix":"-",
-    "owner":Your Discord ID [int],
-    "url_pic":
-       ["https://images.zi.org.tw/applealmond/2020/01/20095200/1579485119-72c988cfaddea239a8516c5b858c56e5.jpg",
-        "https://cdn2.ettoday.net/images/2709/d2709695.jpg",
-        "https://imgbox.com/vVjnP0Mv",
-        "https://imgbox.com/UNN78jH1",
-        "https://imgbox.com/ERRzu8q1",
-        "https://imgbox.com/vAIKcM5X",
-        "https://imgbox.com/zxdL3idW",
-        "https://imgbox.com/akWl9Q09",
-        "https://imgbox.com/Nixwog9F",
-        "https://imgbox.com/bXCCHlq5",
-        "https://imgbox.com/Zd5xI6rA",
-        "https://imgbox.com/mIKscIsc",
-        "https://tenor.com/view/genius-fucking-genius-egoraptor-fucking-genius-sequelitis-mega-man-sequelitis-fucking-genius-gif-13771194"
-        ]
+    "owner":owner_id(int),
+    "webhook":"werhook url (若有使用到lonnstyle/DiscordBotMods的wfm.py)"
 }

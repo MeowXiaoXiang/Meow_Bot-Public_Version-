@@ -1,7 +1,11 @@
 from discord.ext import commands
 from core.classes import Cog_Extension
+import json
 import re
 
+
+with open('setting.json', 'r', encoding='utf8') as jfile:
+    jdata = json.load(jfile)
 
 class easycalc(Cog_Extension):
     def __init__(self,ctx):
@@ -9,7 +13,7 @@ class easycalc(Cog_Extension):
         symbol_list = ['[\d]+e[\+\-][\d]+', '[\d\.]+', '\+', '\-', '\*', '/', '%', '\(', '\)']
         self.symbol = re.compile('(%s)' % '|'.join(symbol_list))
         
-    @commands.command(name='calc', aliases=['計算機' , '計算'])
+    @commands.command(name='calc', aliases=['計算機' , '計算'], brief="common", description=f"簡易的四則運算(支援: + - * / ( ) 小數 科學記號e=10^)中間不能有空格 不支援指數運算 使用方法：{jdata['command_prefix']}calc [數學算式]")
     async def calc(self,ctx, *args):
       msg = self.Calculation(' '.join(args))
       await ctx.send(msg)

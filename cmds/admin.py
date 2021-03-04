@@ -1,5 +1,7 @@
+import discord
 from discord.ext import commands
 from core.classes import Cog_Extension
+from loguru import logger
 import os
 import json
 
@@ -9,7 +11,7 @@ with open('setting.json', 'r', encoding='utf8') as jfile:
 
 class admin(Cog_Extension):
     #清除訊息
-    @commands.command(name='clear', aliases=['clean' , '清除'])
+    @commands.command(name='clear', aliases=['clean' , '清除'], brief="admin", description=f"此功能可以清除指定數量的訊息 用法為：{jdata['command_prefix']}clear [num]")
     async def clear(self,ctx,num:int=0):
       if num == 0:
         await ctx.send(jdata["command_prefix"] + "clear [num] 要刪除的量(行)")
@@ -21,12 +23,17 @@ class admin(Cog_Extension):
               if int(num)>=10:
                 await ctx.send('https://tenor.com/view/explode-blast-blow-nuclear-boom-gif-15025770')
           else:
-              await ctx.send(admin.InsufficientPermissions())
+              await ctx.send('權限不足 本指令只提供給伺服器傭有者 \n本伺服器擁有者為 <@' + str(ctx.guild.owner_id) + '>')
+        except discord.errors.Forbidden:
+          await ctx.send("機器人權限不足")
+          print("機器人本身的權限不足")
+          logger.error('error: Missing Permissions (error code: 50013)')
         except:
-          await ctx.send('請勿在私人頻道使用此功能')
-          print('請勿在私人頻道使用這功能')
-
-    @commands.command(name= 'sendch', aliases=['發送至頻道'])
+          await ctx.send("請勿在私人頻道使用這功能")
+          print("請勿在私人頻道使用這功能")
+   
+    
+    @commands.command(name= 'sendch', aliases=['發送至頻道'], brief="admin", description=f"此功能可以操控機器人像頻道發送訊息 用法為：{jdata['command_prefix']}sendch [頻道ID] 要開啟'外觀->開發者模式'然後對頻道滑鼠右鍵複製ID")
     async def sendch(self,ctx,chid,*,msg):
         if ctx.author.id == jdata['owner']:
             ch = self.bot.get_channel(int(chid))
@@ -35,7 +42,7 @@ class admin(Cog_Extension):
             await ctx.send(admin.InsufficientPermissions())
             
     
-    @commands.command(name= 'send', aliases=['私訊'])
+    @commands.command(name= 'send', aliases=['私訊'], brief="admin", description=f"此功能可以直接用機器人私訊目標用戶 用法為：{jdata['command_prefix']}send [用戶ID] 要開啟'外觀->開發者模式'然後對用戶滑鼠右鍵複製ID")
     async def send(self,ctx,userid,*,msg):
         if ctx.author.id == jdata['owner']:
             if '!' in userid:
@@ -52,18 +59,19 @@ class admin(Cog_Extension):
         else:
             await ctx.send(admin.InsufficientPermissions())
     
-    @commands.command(name='cmd', aliases=['終端機'])
+    @commands.command(name='cmd', aliases=['終端機'], brief="admin", description=f"此功能可以直接對伺服器下命令 請勿隨意亂用 用法為：{jdata['command_prefix']}cmd [Linux or Windows 指令]")
     async def cmd(self,ctx,*,cmd):
         await ctx.message.delete()
         '''
         print(type(ctx.author.id))
         print(type(jdata['owner']))
         '''
-        os.system(cmd)
+        if ctx.author.id == jdata['owner']:
+            os.system(cmd)
 
     class InsufficientPermissions(Exception):
-        def __str__(self):
-            return f'權限不足 本指令只提供給機器人擁有者 \n擁有者為 <@{jdata["owner"]}> '
+      def __str__(self):
+        return f'權限不足 本指令只提供給Meow_Bot擁有者 \n擁有者為 <@{jdata["owner"]}>'
 
 
 def setup(bot):
