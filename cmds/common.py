@@ -10,8 +10,12 @@ class Common(Cog_Extension):
     #ping
     @commands.command(name= 'ping', aliases=['延遲' , '機器人延遲' , 'delay'], brief="common", description="顯示機器人的延遲")
     async def ping(self, ctx):
-        embed=discord.Embed(description=f"⌛ Ping：{round(self.bot.latency*1000)} 毫秒 (ms)",color=0xffae00)
-        await ctx.send(embed=embed)
+      latency = round(self.bot.latency*1000)
+      red = max(0,min(int(255*(latency-50)/1000),255))
+      green = 255-red
+      color = discord.Colour.from_rgb(r=red,g=green,b=0)
+      embed = discord.Embed(title="當前機器人的延遲",description=f'⌛ Ping：{round(self.bot.latency*1000)} 毫秒 (ms)',color=color)
+      await ctx.send(embed=embed)
     #查詢user資訊
     @commands.command(name= 'user', aliases=['使用者資訊' , '用戶資訊'], brief="common", description="查詢你自己的資訊和所在頻道的資訊")
     async def user(self,ctx):

@@ -2,5 +2,5 @@
     "TOKEN": "YOUR TOKEN",
     "command_prefix":"-",
     "owner":owner_id(int),
-    "webhook":"werhook url (若有使用到lonnstyle/DiscordBotMods的wfm.py)"
+    "webhook":"werhook url (若有使用到lonnstyle/DiscordBotMods的wfm.py 沒有的話請刪除這行)"
 }

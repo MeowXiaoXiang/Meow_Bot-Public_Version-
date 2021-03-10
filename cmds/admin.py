@@ -71,7 +71,7 @@ class admin(Cog_Extension):
 
     class InsufficientPermissions(Exception):
       def __str__(self):
-        return f'權限不足 本指令只提供給Meow_Bot擁有者 \n擁有者為 <@{jdata["owner"]}>'
+        return f'權限不足 本指令只提供給機器人擁有者 \n擁有者為 <@{jdata["owner"]}>'
 
 
 def setup(bot):

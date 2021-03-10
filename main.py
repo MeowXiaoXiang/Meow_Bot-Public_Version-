@@ -29,23 +29,32 @@ bot.remove_command('help') #移除原有的help選單 help選單放在common.py�
 @bot.command(name="help" , aliases=['幫助' , '機器人功能' , 'HELP'] ,description="機器人功能選單", brief="common")
 async def help(ctx, options:str="all"):
   if options == "all":
-    helptext="本機器人能夠使用的功能如下（指令：功能描述）：\n普通功能：\n```css\n"
+    commontext="```css\n"
+    warframetext="```css\n"
     for command in bot.commands:
-      if command.brief == "common":         
-        helptext+='{0:12}   {1}\n'.format(jdata['command_prefix'] + str(command), command.description)
-    helptext+="```WARFRAME 查詢功能：\n```css\n"
-    for command in bot.commands:
+      if command.brief == "common":
+        commontext+='{0:14}{1}\n'.format(jdata['command_prefix'] + str(command), command.description)
       if command.brief == "warframe":         
-        helptext+='{0:12}   {1}\n'.format(jdata['command_prefix'] + str(command), command.description)
-    helptext+=f"```\n```管理員指令請打{jdata['command_prefix']}help admin 來查詢\n這個機器人由 XiaoXiang_Meow#6647 製作有問題可以密我喔OwO```"
-    await ctx.send(helptext)
+        warframetext+='{0:14}{1}\n'.format(jdata['command_prefix'] + str(command), command.description)
+    commontext+="```"
+    warframetext+="```"
+    embed=discord.Embed(title="本機器人能夠使用的功能如下（指令：功能描述）", color=0xffd500)
+    embed.add_field(name="普通功能：", value=commontext, inline=False)
+    embed.add_field(name="遊戲：", value=gametext, inline=False)
+    embed.add_field(name="WARFRAME查詢功能：", value=warframetext, inline=True)
+    embed.set_footer(text=f"\n管理員指令請打{jdata['command_prefix']}help admin\n這個機器人由 XiaoXiang_Meow#6647 製作有問題可以密我喔\n")
+    await ctx.send(embed=embed)
   elif options == "admin":
-    helptext="僅限管理員功能：\n```css\n"
+    helptext="```css\n"
     for command in bot.commands:
       if command.brief == "admin":
-        helptext+='{0:12}   {1}\n'.format(jdata['command_prefix'] + str(command), command.description)
+        helptext+='{0:14}{1}\n'.format(jdata['command_prefix'] + str(command), command.description)
     helptext+="```"
-    await ctx.send(helptext)
+    embed=discord.Embed(color=0xffd500)
+    embed.add_field(name="僅限管理員功能：", value=helptext, inline=True)
+    embed.set_footer(text=F"Requested by {ctx.author.name}",icon_url=ctx.author.avatar_url)
+    log(f'使用者：{ctx.author.name}ID：[{ctx.author.id}]|觀看了管理者選單!')
+    await ctx.send(embed=embed)
 
 #-----------------以下為機器人基本模組載入卸載列出下載功能區域------------
 #列出所有此機器人的Python模組 cmds 內的
