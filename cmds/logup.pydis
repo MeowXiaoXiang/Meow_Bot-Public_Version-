@@ -19,6 +19,7 @@ for logname in os.listdir('./log'):
 logindex = 0
 
 class logup(Cog_Extension):
+    tag = "common"
     @commands.command(name= 'loglist', aliases=['列出log' , 'log列表'], brief="admin", description="列出所有機器人攔截到的對話紀錄log檔案清單")
     async def loglist(self,ctx):
         if ctx.author.id == jdata['owner']:

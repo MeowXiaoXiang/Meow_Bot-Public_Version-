@@ -3,11 +3,11 @@ from discord.ext import commands
 import os
 import sys
 import json
+import asyncio
+import requests
 import keep_alive
 from loguru import logger
 from core.time import time_info #時間戳記 時間 UTC+8
-import asyncio
-import requests
 
 intents = discord.Intents.all()
 
@@ -19,46 +19,56 @@ bot = commands.Bot(command_prefix=jdata["command_prefix"],intents = intents)
 @bot.event
 async def on_ready():
     log(f'{bot.user} | Ready!')
+    activity = discord.Activity(type=discord.ActivityType.watching,name = "等待命令")
     while(1):
         await asyncio.sleep(60)
         requests.get("http://127.0.0.1:8080/")
 #------------------------------------------------------------------------------
 bot.remove_command('help') #移除原有的help選單 help選單放在common.py內
 #------------------------------help清單-----------------------------------------
-#help 使用description來提供描述功能 然後把 brief當作類型(例如當作admin或game來分辨) 可以依照下面help那樣當作範例
-@bot.command(name="help" , aliases=['幫助' , '機器人功能' , 'HELP'] ,description="機器人功能選單", brief="common")
-async def help(ctx, options:str="all"):
-  if options == "all":
-    commontext="```css\n"
-    warframetext="```css\n"
+#help指令
+@bot.command(name="help" , aliases=['幫助' , '機器人功能' , 'HELP'] ,description="展示`command`的幫助信息", brief="展示幫助列表")
+async def help(ctx, command:str="all", page:int=1):
+  fields = 0
+  embed = discord.Embed(title="幫助列表",color=0xccab2b)
+  if command == "all":
     for command in bot.commands:
-      if command.brief == "common":
-        commontext+='{0:14}{1}\n'.format(jdata['command_prefix'] + str(command), command.description)
-      if command.brief == "warframe":         
-        warframetext+='{0:14}{1}\n'.format(jdata['command_prefix'] + str(command), command.description)
-    commontext+="```"
-    warframetext+="```"
-    embed=discord.Embed(title="本機器人能夠使用的功能如下（指令：功能描述）", color=0xffd500)
-    embed.add_field(name="普通功能：", value=commontext, inline=False)
-    embed.add_field(name="遊戲：", value=gametext, inline=False)
-    embed.add_field(name="WARFRAME查詢功能：", value=warframetext, inline=True)
-    embed.set_footer(text=f"\n管理員指令請打{jdata['command_prefix']}help admin\n這個機器人由 XiaoXiang_Meow#6647 製作有問題可以密我喔\n")
+      if command.brief != None:
+        if (page-1)*25<fields<=page*25-1:
+          embed.add_field(name=f"{jdata['command_prefix']}{command.name}", value=command.brief, inline=True)
+        fields += 1
+    embed.set_footer(text=f"第{page}/{int((fields-fields%25)/25+1)}頁")
     await ctx.send(embed=embed)
-  elif options == "admin":
-    helptext="```css\n"
-    for command in bot.commands:
-      if command.brief == "admin":
-        helptext+='{0:14}{1}\n'.format(jdata['command_prefix'] + str(command), command.description)
-    helptext+="```"
-    embed=discord.Embed(color=0xffd500)
-    embed.add_field(name="僅限管理員功能：", value=helptext, inline=True)
-    embed.set_footer(text=F"Requested by {ctx.author.name}",icon_url=ctx.author.avatar_url)
-    log(f'使用者：{ctx.author.name}ID：[{ctx.author.id}]|觀看了管理者選單!')
+  elif command in commands.values():
+    for botcommand in bot.commands:
+      if command == "common" and botcommand.cog_name == None:
+        if (page-1)*25<fields<=page*25-1:
+          embed.add_field(name=f"{jdata['command_prefix']}{botcommand.name}", value=botcommand.brief)
+        fields += 1
+      for ext,tag in commands.items():
+        if tag == command and ext == botcommand.cog_name:
+          if (page-1)*25<fields<=page*25-1:
+            embed.add_field(name=f"{jdata['command_prefix']}{botcommand.name}", value=botcommand.brief)
+          fields += 1
+    embed.set_footer(text=f"第{page}/{int((fields-fields%25)/25+1)}頁")
     await ctx.send(embed=embed)
+  else:
+    for botcommand in bot.commands:
+      if botcommand.name == command:
+        aliases = botcommand.name
+        params = ""
+        for param in botcommand.clean_params:
+          params += f"<{param}>"
+        for alias in botcommand.aliases:
+          aliases += f"|{alias}"
+        embed.add_field(name=f"{jdata['command_prefix']}[{aliases}] {params}",value=botcommand.description)
+        await ctx.send(embed=embed)
+        return
+    await ctx.send("找不到您要問的呢")
 
-#-----------------以下為機器人基本模組載入卸載列出下載功能區域------------
-#列出所有此機器人的Python模組 cmds 內的
-@bot.command(name= 'listmod', aliases=['列出所有模組' , '列出模組'], brief="admin", description = "此功能可以列出機器人的所有模組")
+#-----------------以下為機器人基本擴展庫載入卸載列出下載功能區域------------
+#列出所有此機器人的Python擴展庫 cmds 內的
+@bot.command(name= 'listmod', aliases=['列出所有擴展庫' , '列出擴展庫'], brief="列出機器人的擴展庫", description = "此功能可以列出機器人的擴展庫")
 async def listmodel(ctx):
   modlist = []
   modindex = 0
@@ -76,28 +86,9 @@ async def listmodel(ctx):
       else:
           msg = msg + '[' + str(i)[:-3] +']'
           dou = 0
-  await ctx.send(f'```ini\n此機器人目前擁有的所有模組：\n{msg}```')
+  await ctx.send(f'```ini\n此機器人目前擁有的所有擴展庫：\n{msg}```')
 
-#把模組的原始Python檔案下載(預設註解掉 要使用的話把註解拿掉)
-'''
-@bot.command(name= 'downloadmod', aliases=['下載模組' , '模組下載' , '下載mod' , 'mod下載'], brief="admin", description = f"此功能可以下載機器人的模組 用法為：{jdata['command_prefix']}downloadmod [模組名稱]")
-async def downloadmod(ctx, *args):
-    if ctx.author.id == jdata['owner']:
-        mod = ' '.join(args)
-        if mod == ():
-            await ctx.send(NullMod())
-        else:
-            try:
-                fileurl = 'cmds/' + mod + '.py'
-                print(fileurl+'\n')
-                await asyncio.sleep(0.5)
-                upfile = discord.File(F'{fileurl}')
-                await ctx.send(file = upfile)
-            except:
-                await ctx.send('錯誤：無法下載模組')
-'''
-
-@bot.command(name= 'load', aliases=['載入' , '載入模組' , '啟用'], brief="admin", description = f"此功能為載入機器人模組使用 用法為：{jdata['command_prefix']}load [模組名稱]")
+@bot.command(name= 'load', aliases=['載入' , '載入擴展庫' , '啟用'], brief="載入擴展庫", description = f"此功能為載入機器人擴展庫使用\n用法為：{jdata['command_prefix']}load [擴展庫名稱]")
 async def load(ctx, extension:str ='Null'):
   if ctx.author.id == jdata['owner']:
     if extension == 'Null':
@@ -113,7 +104,7 @@ async def load(ctx, extension:str ='Null'):
   else:
       await ctx.send(InsufficientPermissions())
 
-@bot.command(name= 'unload', aliases=['卸載' , '卸載模組' , '停用'], brief="admin", description = f"此功能為停用機器人模組使用 用法為：{jdata['command_prefix']}unload [模組名稱]")
+@bot.command(name= 'unload', aliases=['卸載' , '卸載擴展庫' , '停用'], brief="卸載擴展庫", description = f"此功能為停用機器人擴展庫使用\n用法為：{jdata['command_prefix']}unload [擴展庫名稱]")
 async def unload(ctx, extension:str='Null'):
   if ctx.author.id == jdata['owner']:
     if extension == 'Null':
@@ -130,7 +121,7 @@ async def unload(ctx, extension:str='Null'):
       await ctx.send(InsufficientPermissions())
 
 
-@bot.command(name= 'reload', aliases=['重載' , '重載模組' , '重新載入模組', '重新加載', '重啟' , '重新載入'], brief="admin", description = f"此功能為重啟機器人模組使用 用法為：{jdata['command_prefix']}reload [模組名稱]")
+@bot.command(name= 'reload', aliases=['重載' , '重載擴展庫' , '重新載入擴展庫'], brief="重啟機器人", description = f"此功能為重啟機器人擴展庫使用\n用法為：{jdata['command_prefix']}reload [擴展庫名稱]")
 async def reload(ctx, extension:str ='Null'):
   if ctx.author.id == jdata['owner']:
     if extension == 'Null':
@@ -148,7 +139,7 @@ async def reload(ctx, extension:str ='Null'):
 
 #機器人關閉系統--------------------------------------------   
 
-@bot.command(name= 'disconnect', aliases=['disable' , 'shutdown' , '關閉機器人' , '關機' , '關閉'], brief="admin", description = "此功能為關閉機器人")
+@bot.command(name= 'disconnect', aliases=['disable' , 'shutdown' , '關閉機器人' , '關機' , '關閉'], brief="關閉機器人", description = "此功能為關閉機器人")
 async def turn_off_bot(ctx):
   if ctx.message.author.id == jdata['owner']:
     print(f"-----------------------------------------\n{time_info.UTC_8()}\n機器人已關閉" + "\n-----------------------------------------")
@@ -198,10 +189,20 @@ def set_logger():
 def log(msg):
     logger.info(msg)
 
-#------------把cmd內的所有模組做載入--------------
+#------------把cmd內的所有擴展庫做載入--------------
 for filename in os.listdir('./cmds'):
     if filename.endswith('.py'):
         bot.load_extension(f'cmds.{filename[:-3]}')
+#-----------------------------------------------
+commands = {}
+for extension in bot.extensions:
+  package = extension
+  name = extension[5:]
+  tags = getattr(__import__(package, fromlist=[name]), name)      
+  try:
+    commands[name] = tags.tag
+  except:
+    pass
        
 if __name__ == "__main__":
     set_logger()

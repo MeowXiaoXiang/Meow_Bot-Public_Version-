@@ -6,5 +6,5 @@ class Cog_Extension(commands.Cog):
             if not os.path.exists('log'):
                 print(' * The logs folder is not exists.\n * Creating logs folder...')
                 os.mkdir('log')
-                print(' * Starting Meow_Bot...')
+                print(' * Starting Bot...')
             self.bot = bot

@@ -11,6 +11,7 @@ with open('setting.json', 'r', encoding='utf8') as jfile:
 class event(Cog_Extension):
   @commands.Cog.listener()
   async def on_message(self,msg):
+    tag = "common"
     if str(msg.channel.type) == 'private' and msg.author != self.bot.user:
         print(time_info.UTC_8() + str(msg.author) + '說:' + msg.content)
         '''
