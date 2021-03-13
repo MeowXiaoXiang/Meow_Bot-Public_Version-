@@ -12,7 +12,7 @@ with open('setting.json', 'r', encoding='utf8') as jfile:
 class admin(Cog_Extension):
     #清除訊息
     tag = "admin"
-    @commands.command(name='clear', aliases=['clean' , '清除'], brief="admin", description=f"此功能可以清除指定數量的訊息 用法為：{jdata['command_prefix']}clear [num]")
+    @commands.command(name='clear', aliases=['clean' , '清除'], brief="刪除聊天記錄", description=f"此功能可以清除指定數量的訊息 用法為：{jdata['command_prefix']}clear [num]")
     async def clear(self,ctx,num:int=0):
       if num == 0:
         await ctx.send(jdata["command_prefix"] + "clear [num] 要刪除的量(行)")

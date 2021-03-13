@@ -20,7 +20,7 @@ logindex = 0
 
 class logup(Cog_Extension):
     tag = "common"
-    @commands.command(name= 'loglist', aliases=['列出log' , 'log列表'], brief="admin", description="列出所有機器人攔截到的對話紀錄log檔案清單")
+    @commands.command(name= 'loglist', aliases=['列出log' , 'log列表'], brief="機器人紀錄的對話紀錄列表", description="列出所有機器人攔截到的對話紀錄log檔案清單")
     async def loglist(self,ctx):
         if ctx.author.id == jdata['owner']:
             await ctx.send(f'Log列表\n指令：{jdata["command_prefix"]}downloadlog [編號] ,{ jdata["command_prefix"]}reloadlog')
