@@ -4,7 +4,6 @@
 
 + pip install flask
 + pip install discord
-+ pip install discord.py
 + pip install loguru
 
 其餘需要安裝的套件視你裝上的mod所需而定
